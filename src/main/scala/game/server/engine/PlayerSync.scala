@@ -20,7 +20,8 @@ class PlayerSync(playerClient: ActorRef, playerID: String) extends Actor with Ac
     registerSnapshot(sequence, newGameState)
 
     val changes = diff(lastAcknowledgedState, newGameState)
-    playerClient ! Delta(sequence, changes)
+    if(changes.nonEmpty)
+      playerClient ! Delta(sequence, changes)
   }
 
   def nextSequence(): Long = {
