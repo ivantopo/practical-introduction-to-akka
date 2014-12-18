@@ -1,7 +1,8 @@
 package game.server.engine
 
 import akka.actor.{ActorLogging, Props, Actor, ActorRef}
-import game.server.engine.PlayerSync.{DeltaAck, PlayerDelta, Snapshot, Delta}
+import game.server.engine.PlayRoom.PlayerAck
+import game.server.engine.PlayerSync.{ PlayerDelta, Snapshot, Delta}
 
 class PlayerSync(playerClient: ActorRef, playerID: String) extends Actor with ActorLogging {
   log.info("New player {} connected.", playerID)
@@ -11,7 +12,7 @@ class PlayerSync(playerClient: ActorRef, playerID: String) extends Actor with Ac
 
   def receive = {
     case newState: GameState => dispatchGameStateDeltas(newState)
-    case DeltaAck(ackedSequence) => ack(ackedSequence)
+    case PlayerAck(_, ackedSequence) => ack(ackedSequence)
   }
 
   def dispatchGameStateDeltas(newGameState: GameState): Unit = {
@@ -69,5 +70,4 @@ object PlayerSync {
   case class PlayerDelta(xPosition: Option[Int], yPosition: Option[Int])
   case class Snapshot(sequence: Long, gameState: GameState, var acked: Boolean)
   case class Delta(sequence: Long, changes: Map[String, PlayerDelta])
-  case class DeltaAck(sequence: Long)
 }

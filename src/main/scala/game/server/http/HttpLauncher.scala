@@ -2,7 +2,7 @@ package game.server.http
 
 import akka.actor._
 import akka.io.Tcp.ConnectionClosed
-import game.server.engine.PlayRoom.{Join, PlayerUpdate}
+import game.server.engine.PlayRoom.{PlayerAck, Join, PlayerUpdate}
 import game.server.engine.PlayerSync.{PlayerDelta, Delta}
 import game.server.engine.{PlayerState, PlayRoom}
 import spray.http.CacheDirectives.`no-cache`
@@ -70,6 +70,12 @@ object HttpLauncher extends App with SimpleRoutingApp with SprayJsonSupport {
             playRoom ! PlayerUpdate(playerID, playerState)
             StatusCodes.Accepted
           }
+        }
+      } ~
+      path("player" / Segment / "ack" / LongNumber) { (playerID, sequence) =>
+        complete {
+          playRoom ! PlayerAck(playerID, sequence)
+          StatusCodes.Accepted
         }
       }
     } ~
